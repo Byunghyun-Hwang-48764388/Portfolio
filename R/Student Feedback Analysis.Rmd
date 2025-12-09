@@ -1,0 +1,844 @@
+---
+title: "STAT6190: Statistical Report"
+author: "Byunghyun Hwang 48764388"
+date: "Compiled and submitted on 15th June 2025"
+output: 
+    bookdown::pdf_document2:
+      keep_tex: no
+      toc: false
+      number_sections: false
+      latex_engine: xelatex
+---
+
+
+# Introduction
+
+This study investigates the feedback collected from undergraduate and postgraduate students across multiple courses and its relation with several self-reported variables. 
+
+It answers the following **research questions**:
+
+1. On average, do students study more than 12 hours/week for each unit?
+2. On average, is the satisfaction score above 6.5?
+3. Did satisfaction change after course redesign?
+4. Analyse satisfaction and gender:
+		a. Does satisfaction vary with gender?
+		b. Is satisfaction different between males and females?
+5. Does satisfaction differ by course?
+6. What is the effect of gender and level of education on satisfaction? Is there an interaction between gender and level of education?
+7. Is the proportion of males equal to that of females?
+8. Are course and recommendation in the male population associated?
+9. Are gender and perceived improvement associated?
+10. What are the key predictors of students’ satisfaction score? 
+		a. Find the best linear model to explain students’ satisfaction score.
+		b. Comment on the effect size of the significant predictor
+		c. Comment on how much of the variation in satisfaction can be explained by the significant predictors.
+
+
+
+# Data Description
+
+The dataset includes 200 observations of the following variables:
+
+- `student_id`: Participant identifier.
+- `course`: One of "Data Science", "Business", "Psychology", "Engineering".
+- `level`: One of "Undergraduate", "Postgraduate".
+- `gender`: One of "Male", "Female", "Other answer".
+- `study_hours`: Weekly hours of study per unit.
+- `satisfaction_score`: The satisfaction score by course.
+- `recommended`: Would the student recommend this course to other students? Yes/No.
+- `improved`: Perceived improvement in student's understanding: is it at the expected level? Yes/No.
+- `before_vs_after_score`: The difference in satisfaction score after a redesign.
+
+
+\newpage
+
+
+# Exploratory Data Analysis
+
+## Summary Statistics
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+library(kableExtra)
+library(ggplot2)
+library(gtsummary)
+library(dplyr)
+
+feedback_data <- read.csv("feedback.csv")
+
+feedback_data %>%
+  select(
+    course, level, gender, study_hours, satisfaction_score,
+    recommended, improved, before_vs_after_score
+  ) %>%
+  tbl_summary(
+    by = gender,
+    type = all_continuous() ~ "continuous2",
+    statistic = all_continuous() ~ "{mean} ({sd})",
+    digits = all_continuous() ~ 1,
+    missing = "no"
+  ) %>%
+  add_overall() %>%
+  bold_labels() %>%
+  modify_caption("Summary of Student Feedback by Gender (Mean)") %>%
+  as_kable() %>%
+  kable_styling(       
+    latex_options = c("hold_position", "scale_down"),
+    position = "center"
+  )
+```
+
+The statistics table by gender shows that the average student satisfaction score was 7. Approximately 70% of students answered that they would recommend the courses. Half of students felt that they had improved. Then, females' satisfaction is slightly higher than males' satisfaction. Furthermore, it seems that there was no significant improvement after course redesign. 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+library(kableExtra)
+library(ggplot2)
+library(gtsummary)
+library(dplyr)
+
+feedback_data <- read.csv("feedback.csv")
+
+feedback_data %>%
+  select(
+    course, level, gender, study_hours, satisfaction_score,
+    recommended, improved, before_vs_after_score
+  ) %>%
+  tbl_summary(
+    by = course,
+    type = all_continuous() ~ "continuous2",
+    statistic = all_continuous() ~ "{mean} ({sd})",
+    digits = all_continuous() ~ 1,
+    missing = "no"
+  ) %>%
+  add_overall() %>%
+  bold_labels() %>%
+  modify_caption("Summary of Student Feedback by Course (Mean)") %>%
+  as_kable() %>%
+  kable_styling(       
+    latex_options = c("hold_position", "scale_down"),
+    position = "center"
+  )
+```
+
+The statistics table by course shows that data science has the highest average satisfaction score of 7.5, while engineering has the lowest average satisfaction score of 6.5. Approximately 70% of students recommend the courses. Particularly, students in business tend to recommend the course relatively more often, compared to students in the other courses. Notably, students in engineering exhibited slightly a higher perceived improvement rate of 52%. In contrast, students in psychology exhibited a slightly lower perceived improvement of 47%.     
+
+
+\newpage
+
+
+## Visual Exploration
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, fig.width=10, fig.height=6}
+library(ggplot2)
+library(gridExtra)
+
+base_theme <- theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 10),
+        axis.title = element_text(size = 8),
+        axis.text = element_text(size = 6))
+
+average_study_hours <- mean(feedback_data$study_hours, na.rm = TRUE)
+
+p1 <- ggplot(feedback_data, aes(x = study_hours)) +
+  geom_histogram(binwidth = 1, fill = "skyblue", color = "black") +
+  geom_vline(xintercept = average_study_hours, color = "red", linetype = "dashed", linewidth = 1) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    axis.title.x = element_text(size = 13),   
+    axis.title.y = element_text(size = 13),   
+    axis.text.x = element_text(size = 12),   
+    axis.text.y = element_text(size = 12)) +
+  labs(title = "Distribution of Study Hours",
+       x = "Study Hours (hours/week)", y = "Number of Students")
+
+average_satisfaction_score <- mean(feedback_data$satisfactio, na.rm = TRUE)
+
+p2 <- ggplot(feedback_data, aes(x = satisfaction_score)) +
+  geom_histogram(binwidth = 1, fill = "skyblue", color = "black") +
+  geom_vline(xintercept = 6.5, color = "red", linetype = "dashed", size = 1) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    axis.title.x = element_text(size = 13),   
+    axis.title.y = element_text(size = 13),   
+    axis.text.x = element_text(size = 12),   
+    axis.text.y = element_text(size = 12)) + 
+  labs(title = "Distribution of Satisfaction Score", 
+       x = "Satisfaction Score", y = "Number of Students")
+
+grid.arrange(p1, p2, ncol = 2)
+```
+
+```{r echo=FALSE, fig.width=10, fig.height=6}
+base_theme <- theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 10),
+        axis.title = element_text(size = 8),
+        axis.text = element_text(size = 6))
+
+average_satisfaction_change <- mean(feedback_data$before_vs_after_score, na.rm = TRUE)
+
+p3 <- ggplot(feedback_data, aes(x = before_vs_after_score)) +
+  geom_histogram(binwidth = 1, fill = "skyblue", color = "black") +
+  geom_vline(xintercept = average_satisfaction_change, color = "red", linetype = "dashed", size = 1) +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    axis.title.x = element_text(size = 13),   
+    axis.title.y = element_text(size = 13),   
+    axis.text.x = element_text(size = 12),   
+    axis.text.y = element_text(size = 12)) + 
+  labs(title = "Satisfaction Score Difference",
+       x = "Satisfaction Score Difference After Course Redesign", y = "Number of Students")
+
+p4 <- ggplot(feedback_data, aes(x = gender, y = satisfaction_score, fill = gender)) +
+  geom_boxplot() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    axis.title.x = element_text(size = 13),   
+    axis.title.y = element_text(size = 13),   
+    axis.text.x = element_text(size = 12),   
+    axis.text.y = element_text(size = 12)) + 
+  labs(title = "Satisfaction Score by Gender", x = "Gender", y = "Satisfaction Score")
+
+grid.arrange(p3, p4, ncol = 2)
+```
+
+```{r echo=FALSE, fig.width=10, fig.height=6}
+p5 <- ggplot(feedback_data, aes(x = course, y = satisfaction_score, fill = course)) +
+  geom_boxplot() +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    axis.title.x = element_text(size = 13),   
+    axis.title.y = element_text(size = 13),   
+    axis.text.x = element_text(size = 12, angle = 45, hjust = 1),   
+    axis.text.y = element_text(size = 12)) + 
+  labs(title = "Satisfaction Score by Course", y = "Satisfaction Score", x = "Course")
+
+p6 <- ggplot(feedback_data, aes(x = level, y = satisfaction_score, fill = level)) +
+  geom_boxplot() +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    axis.title.x = element_text(size = 13),   
+    axis.title.y = element_text(size = 13),   
+    axis.text.x = element_text(size = 12),   
+    axis.text.y = element_text(size = 12)) + 
+  labs(title = "Satisfaction Score by Level", y = "Satisfaction Score", x = "Level")
+
+grid.arrange(p5, p6, ncol = 2)
+```
+```{r echo=FALSE, fig.width=10, fig.height=6}
+p7 <- ggplot(feedback_data, aes(
+  x = level, 
+  y = satisfaction_score, color = gender, group = gender)) +
+  stat_summary(fun = mean, geom = "point", size = 3) +
+  stat_summary(fun = mean, geom = "line") +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    axis.title.x = element_text(size = 13),   
+    axis.title.y = element_text(size = 13),   
+    axis.text.x = element_text(size = 12),   
+    axis.text.y = element_text(size = 12)) +   
+  labs(title = "Interaction Plot")
+
+rec_prop <- feedback_data %>%
+  filter(gender == "Male") %>%  
+  group_by(course, recommended) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  group_by(course) %>%
+  mutate(prop = count / sum(count))
+
+p8 <- course_recommend <- ggplot(rec_prop, aes(x = course, y = prop, fill = recommended)) +
+  geom_bar(stat = "identity", position = "fill") +  
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(
+    title = "Recommendation by Course (Male)",
+    x = "Course",
+    y = "Proportion",
+    fill = "Recommendation"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    axis.title.x = element_text(size = 13),
+    axis.title.y = element_text(size = 13),
+    axis.text.x = element_text(size = 10, angle = 45),
+    axis.text.y = element_text(size = 12)
+  )
+
+grid.arrange(p7, p8, ncol = 2)
+```
+```{r echo=FALSE, fig.height=5, fig.width=10}
+plot_data <- feedback_data %>%
+  group_by(gender, improved) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  group_by(gender) %>%
+  mutate(prop = count / sum(count))
+
+p9 <- ggplot(plot_data, aes(x = gender, y = prop, fill = improved)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(
+    title = "Improvement by Gender",
+    x = "Gender",
+    y = "Proportion",
+    fill = "Improvement"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    axis.title.x = element_text(size = 13),
+    axis.title.y = element_text(size = 13),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12)
+  )
+
+print(p9)
+```
+
+# Results
+
+## Do students study more than 12 hours/week/unit on average?
+
+$$
+H_0: \mu <= 12 \quad \text{vs.} \quad H_1: \mu > 12
+$$
+
+The summary statistics table shows that the average study hours are 14.1, which is greater than 12. A Q-Q plot and a Shapiro-Wilk normality test were conducted to assess if study hours follow a normal distribution (see Appendix 1). As a result (p < 0.05), study hours do not follow a normal distribution, making it inappropriate to assess the average study hours. Instead, a Wilcoxon signed rank test was conducted (see Appendix 1). According to the test result (p < 0.05), the median study hours are statistically significantly greater than 12.
+
+
+## Is satisfaction score above 6.5 on average?
+
+$$
+H_0: \mu <= 6.5 \quad \text{vs.} \quad H_1: \mu > 6.5
+$$
+
+The summary statistics table shows that the average satisfaction score is 7, which is greater than 6.5. A Q-Q plot and a Shapiro-Wilk normality test were conducted to assess if satisfaction scores follow a normal distribution (see Appendix 2). As a result (p < 0.05), satisfaction scores do not follow a normal distribution, making it inappropriate to assess the average satisfaction score. Instead, a Wilcoxon signed rank test was conducted (see Appendix 2). According to the test result (p < 0.05), the median satisfaction score is statistically significantly greater than 6.5. 
+
+
+## Did satisfaction change after course redesign?
+
+$$
+H_0: \mu_{\text{after}} - \mu_{\text{before}} = 0 \quad \text{vs.} \quad H_1: \mu_{\text{after}} - \mu_{\text{before}} \neq 0
+$$
+
+The relative frequencies of student responses regarding satisfaction after course redesign were analyzed (see Appendix 3). 32.5% of students reported decreased satisfaction scores, while 67% of students reported increased satisfaction scores after the course redesign. Then, 0.5% of students 
+reported no changes in satisfaction scores. A Q-Q plot and a Shapiro-Wilk normality test were conducted to assess if the differences in satisfaction scores before and after course redesign follow a normal distribution (see Appendix 3). As a result (p < 0.05), the differences in satisfaction scores before and after course redesign do not follow a normal distribution, making it inappropriate to assess the average difference in satisfaction scores before and after course redesign. Instead, a Wilcoxon signed rank test was conducted (see Appendix 3). According to the test result (p < 0.05), the median difference in satisfaction scores between before and after course redesign has statistically significantly changed.  
+
+
+## Does satisfaction vary with gender? Is it different between males and females?
+
+$$
+H_0: \text{median}_{\text{male}} = \text{median}_{\text{female}} = \text{median}_{\text{other}}\quad\\ \\\text{vs.} \quad H_1: \text{at least one }  \text{median}_{\text{i}} \neq  \text{median}_{\text{j}} 
+$$
+
+Since students' satisfaction scores do not follow a normal distribution, based on previous analysis, median values were chosen to test the hypothesis. However, normality tests were conducted to confirm the absence of normality. Male and female groups have equal median satisfaction scores of 7, while other group has a satisfaction score of 7.1 (see Appendix 4). Q-Q plots and a Shapiro-Wilk normality test were conducted to assess if the satisfaction scores by gender follow a normal distribution (see Appendix 4). As a result (p < 0.05), the satisfaction scores of males and females do not follow a normal distribution. A Kruskal-Wallis rank sum test was conducted (see Appendix 4). According to the result (p > 0.05), there are no statistically significant differences in the median satisfaction scores across genders. In addition, a Wilcoxon rank sum test was conducted to assess the difference in the median satisfaction scores between males and females. According to the result (p > 0.05), there is no statistically significant difference in the median satisfaction scores between males and females.   
+
+
+## Does satisfaction differ by course?
+
+$$
+H_0: \text{median}_{\text{male}} = \text{median}_{\text{female}} = 
+\text{median}_{\text{other}}\quad \text{vs.} \quad H_1: \text{at least one }  \text{median}_{\text{i}} \neq  \text{median}_{\text{j}} 
+$$ 
+
+Since students' satisfaction scores do not follow a normal distribution based on previous analysis, median values were chosen to test the hypothesis. However, normality tests were conducted to confirm the absence of normality. The median satisfaction scores are 6.8, 7.5, 6.5, and 7.2 for business, data science, engineering, and psychology respectively (see Appendix 5). Q-Q plots and a Shapiro-Wilk normality test were conducted to assess if the satisfaction scores by course follow a normal distribution (see Appendix 5). As a result (p > 0.05), the satisfaction scores by course follow a normal distribution, except for the satisfaction scores of data science (p < 0.05). Then, a Kruskal-Wallis rank sum test was conducted (see Appendix 5). According to the test result (p < 0.05), the median satisfaction scores are statistically significantly different across courses.  
+
+
+## What is the effect of gender and level of education on satisfaction? Is there an interaction between gender and level of education?
+
+$$ 
+H_0:\beta_{\text{gender : level}} = 0 \quad \text{vs.} \quad H_1: 
+\beta_{\text{gender : level}} \neq 0 
+$$
+
+Based on the interaction plot in the EDA section, it seems that there is no interaction between gender and level since the lines do not cross and they are parallel. A Q-Q plot and a Shapiro-Wilk normality test were conducted to assess if the ANOVA residuals follow a normal distribution (see Appendix 6). As a result (p < 0.05), the residuals do not follow a normal distribution, suggesting the use of a GLM model. GLM model was selected since residuals do not need to follow a normal distribution and satisfaction scores approximately follow a normal distribution (please refer to the plot of the satisfaction score distribution in the EDM section). According to the GLM result (all p-values > 0.05), gender, level, and their interaction do not have a statistically significant effect on satisfaction. To support the outcome, a two-way ANOVA test was conducted (see Appendix 6). Although its accuracy may be not reliable due to the absence of normality, its result (all p-values > 0.05) also indicates that gender, level, and their interaction do not have a statistically significant effect on satisfaction.   
+
+
+## Is the proportion of males equal to that of females?
+
+$$ 
+H_0:\ p_{\text{male}} = p_{\text{female}} \quad \text{vs.} \quad H_1: p_{\text{male}} \neq p_{\text{female}}
+$$
+
+The summary statistics table shows that the total number of females is 981, while the total number of males is 929. A Chi-squared test was conducted (see Appendix 7) and the result (p > 0.05) indicates that there is no statistically significant difference in gender proportions. 
+
+
+## Are course and recommendation in the male population associated?
+
+$$
+\begin{aligned}
+H_0:\ P {\text{(Recommendation | Course)}} = P{\text{(Recommendation)}} \quad \text{vs.}\\   
+H_1:\ P {\text{(Recommendation | Course)}}  \neq P{\text{(Recommendation)}}
+\end{aligned}
+$$
+
+In the male population, more than half of male students recommend each course (please refer to the plot of recommendation by course in the EDA section). However, a Chi-squared test was conducted (see Appendix 8) and the result (p > 0.05) indicates that course and recommendation are not statistically significantly associated. 
+
+
+## Are gender and perceived improvement associated?
+
+$$
+\begin{aligned}
+H_0:\ P {\text{(Improvement | Gender)}} = P{\text{(Improvement)}} \quad \text{vs.}\\  
+H_1:\ P {\text{(Improvement | Gender)}}  \neq P{\text{(Improvement)}}
+\end{aligned}
+$$
+
+Approximately half of students perceived improvement across genders (please refer to the plot of improvement by gender in the EDA section). A Chi-squared test was conducted (see Appendix 9) and the result (p > 0.05) indicates that there is no statistically significant association between gender and perceived improvement.
+
+
+## What are the key predictors of students’ satisfaction score, and how much of the variation in satisfaction can be explained by study habits and demographics?
+
+A linear model was used to identify key predictors for students' satisfaction (see Appendix 10). The key predictor of students' satisfaction is course (p < 0.05). Particularly, students in data science and psychology have higher satisfaction on average. The other features do not have statistically significant associations with students' satisfaction. In addition, the interaction of course and gender slightly improved the model performance.  
+
+Female students in business showed an average 6.7 satisfaction score (p < 0.05). Female students in data science showed a 0.88 points higher average satisfaction score than female students in business (p < 0.05). Female students in psychology showed a 0.54 points higher average satisfaction score than female students in business (p < 0.05). In addition, male and the interaction of male and data science have marginally significant associations with satisfaction (see Appendix 10). Males in business showed 2.4 points higher average satisfaction score than females in business. Then, the difference in average satisfaction scores between males and females in data science is approximately 0.33 points lower than the difference between males and females in business.
+
+Course and its interaction with gender explain only approximately 6.5% of the variation in satisfaction. For future research, additional predictors that can explain the remaining 93.5% should be identified and incorporated.     
+
+  
+
+# Discussion
+
+This study was conducted to find insights into students' satisfaction based on feedback data collected from undergraduate and postgraduate students across multiple courses. Meaningful insights are listed below; 
+
+- More than half of students reported satisfaction scores more than 6.5.
+- After course redesign, students' satisfaction has changed significantly. 67% of students showed increased satisfaction.
+- Students' satisfaction differs across courses. The course with the highest satisfaction is data science and the course with the lowest satisfaction is engineering.
+- Students' satisfaction does not differ across genders.
+- Gender and education level are not associated with students' satisfaction.
+- Gender is not associated with perceived improvement.
+- Course is not associated with recommendation.
+- The proportions of males and females are equal.
+- Course is a key predictor for students' satisfaction.
+  - Female students in business showed an average 6.7 satisfaction score.
+  - Female students in data science showed a 0.88 points higher average satisfaction score than          female students in business.
+  - Female students in psychology showed a 0.54 points higher average satisfaction score than female     students in business.
+  - Males in business showed 2.4 points higher average satisfaction score than females in business.
+  - The difference in average satisfaction scores between males and females in data science is           approximately 0.33 points lower than the difference between males and females in business.
+
+However, this study has a limitation. Only 6.5% of the variation in satisfaction can be explained by the key predictor and its interaction with gender. The remaining 93.5% can be explained by additional predictors that should be identified and added for future study.    
+
+
+\newpage
+
+
+# Appendix 1. Do students study more than 12 hours/week on average?
+
+$$
+H_0: \mu <= 12 \quad \text{vs.} \quad H_1: \mu > 12
+$$
+
+```{r}
+qqnorm(feedback_data$study_hours,
+       main = "QQ Plot for Study Hours",
+       xlab = "Theoretical Quantiles (Normal Distribution)",
+       ylab = "Sample Quantiles (Study Hours)")
+
+qqline(feedback_data$study_hours, col = "red")
+```
+
+```{r}
+shapiro.test(feedback_data$study_hours)
+```
+According to the Q-Q plot and Shapiro-Wilk normality test results, study hours do not follow a normal distribution (p < 0.05), indicating the average study hours may be misleading and justifying the use of a Wilcoxon signed rank test. 
+
+```{r}
+wilcox.test(feedback_data$study_hours, mu = 12, alternative = "greater")
+```
+
+According to the Wilcoxon signed rank test result, the median study hour is significantly greater than 12 (p < 0.05). 
+
+
+
+# Appendix 2. Is satisfaction score above 6.5 on average?
+
+$$
+H_0: \mu <= 6.5 \quad \text{vs.} \quad H_1: \mu > 6.5
+$$
+
+```{r}
+qqnorm(feedback_data$satisfaction_score,
+       main = "QQ Plot for Satisfaction Score",
+       xlab = "Theoretical Quantiles (Normal Distribution)",
+       ylab = "Sample Quantiles (Satisfaction Score)")
+
+qqline(feedback_data$satisfaction_score, col = "red")
+```
+
+```{r}
+shapiro.test(feedback_data$satisfaction_score)
+```
+According to the Q-Q plot and Shapiro-Wilk normality test results, satisfaction scores do not follow a normal distribution (p < 0.05), indicating that the average satisfaction score may be misleading and justifying the use of a Wilcoxon signed rank test. 
+
+
+```{r}
+wilcox.test(feedback_data$satisfaction_score, mu = 6.5, alternative = "greater")
+```
+
+According to the Wilcoxon signed rank test result, the median satisfaction score is statistically significantly greater than 6.5 (p < 0.05). 
+
+
+
+# Appendix 3. Did satisfaction change after course redesign?
+
+$$
+H_0: \mu_{\text{after}} - \mu_{\text{before}} = 0 \quad \text{vs.} \quad H_1: \mu_{\text{after}} - \mu_{\text{before}} \neq 0
+$$
+
+```{r}
+satisfaction_change_table <- table(
+  Satisfaction_Change_Result = 
+    ifelse(feedback_data$before_vs_after_score > 0, "Increased",
+    ifelse(feedback_data$before_vs_after_score < 0, "Decreased", "No Change"))
+)
+
+prop.table(satisfaction_change_table)
+```
+
+According to the relative frequency table, 32.5% of students showed decreased satisfaction scores and 67% of students showed increased satisfaction scores, while 0.5% of students answered no changes. To assess whether the differences in satisfaction scores between before and after course redesign are statistically significant, a t-test or Wilcoxon signed rank test should be conducted.
+
+
+```{r}
+qqnorm(feedback_data$before_vs_after_score,
+       main = "QQ Plot for Satisfaction Score Difference",
+       xlab = "Theoretical Quantiles (Normal Distribution)",
+       ylab = "Sample Quantiles (Satisfaction Score Difference)")
+
+qqline(feedback_data$before_vs_after_score,col = "red")
+```
+
+```{r}
+shapiro.test(feedback_data$before_vs_after_score)
+```
+
+According to the Q-Q plot and Shapiro-Wilk normality test results, the differences in satisfaction scores between before and after course redesign do not follow a normal distribution (p < 0.05), indicating the average difference in satisfaction scores between before and after course redesign may be misleading and justifying the use of a Wilcoxon signed rank test. 
+
+
+```{r}
+wilcox.test(feedback_data$before_vs_after_score, mu = 0, alternative = "two.sided")
+```
+
+According to the Wilcoxon signed rank test result, the median difference in satisfaction scores between before and after course redesign is statistically significantly different from zero (p < 0.05), suggesting that students' satisfaction scores have changed after course redesign.  
+
+
+
+# Appendix 4. Does satisfaction vary with gender? Is it different between males and females?
+
+$$
+H_0: \text{median}_{\text{male}} = \text{median}_{\text{female}} = \text{median}_{\text{other}}\quad \text{vs.} \quad H_1: \text{at least one }  \text{median}_{\text{i}} \neq  \text{median}_{\text{j}} 
+$$
+
+```{r}
+feedback_data %>%
+  group_by(gender) %>%
+  summarise(
+    count = n(),
+    mean_satisfaction_score = mean(satisfaction_score, na.rm = TRUE),
+    median_satisfaction_score = median(satisfaction_score, na.rm = TRUE),
+  )
+```
+Since students' satisfaction scores do not follow a normal distribution based on previous analysis, median values were chosen to test the hypothesis. According to the statistics table, the median satisfaction scores of the three gender categories are 7 or 7.1. To assess whether the median satisfaction scores across genders are statistically significant, a Kruskal-Wallis rank sum test should be conducted.
+
+
+```{r}
+ggplot(feedback_data, aes(sample = satisfaction_score)) +
+  stat_qq() +
+  stat_qq_line(color = "red") +
+  facet_wrap(~ gender) +
+  labs(title = "QQ Plot of Satisfaction Score by Gender",
+       x = "Theoretical Quantiles (Normal Distribution)",
+       y = "Sample Quantiles (Satisfaction Score)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+feedback_data %>%
+  group_by(gender) %>%
+  summarise(p_value = shapiro.test(satisfaction_score)$p.value)
+```
+Normality tests were conducted to confirm the absence of normality. According to the Q-Q plots and Shapiro-Wilk normality test results, satisfaction scores of females and males do not follow a normal distribution (p < 0.05) while satisfaction scores of others follow a normal distribution (p > 0.05). This justifies the use of a Kruskal-Wallis rank sum test. 
+
+
+```{r}
+gender_satisfaction_result <- kruskal.test(satisfaction_score ~ gender, 
+                                           data = feedback_data)
+
+print(gender_satisfaction_result)
+```
+
+According to the Kruskal-Wallis rank sum test result, the null hypothesis is not rejected (p > 0.05). The median satisfaction scores are not statistically significantly different across genders. 
+
+
+$$
+H_0: \text{median}_{\text{male}} = \text{median}_{\text{female}} \quad \text{vs.} \quad H_1: \text{median}_{\text{male}} \neq  \text{median}_{\text{female}} 
+$$
+
+```{r}
+male_female_df <- subset(feedback_data, gender %in% c("Male", "Female"))
+
+wilcox.test(satisfaction_score ~ gender, data = male_female_df)
+```
+
+A Wilcoxon rank sum test result was conducted. According to the result, the null hypothesis is not rejected. The result indicates that the median satisfaction scores of males and females are not statistically significantly different (p > 0.05).
+
+
+
+# Appendix 5. Does satisfaction differ by course?
+
+$$
+\begin{aligned}
+H_0: & \quad \text{median}_{\text{DS}} = \text{median}_{\text{BS}} = 
+\text{median}_{\text{PS}} = \text{median}_{\text{EG}} \quad \text{vs.} \\  
+H_1: & \quad \text{at least one } \text{median}_i \neq \text{median}_j
+\end{aligned}
+$$ 
+
+```{r}
+feedback_data %>%
+  group_by(course) %>%
+  summarise(
+    mean_satisfaction = mean(satisfaction_score, na.rm = TRUE),
+    median_satisfaction = median(satisfaction_score, na.rm = TRUE),
+    count = n()
+  )
+```
+
+Since students' satisfaction scores do not follow a normal distribution based on previous analysis, median values were chosen to test the hypothesis. This statistics table shows mean satisfaction scores, median satisfaction scores, and total number of samples across courses. To assess whether the median satisfaction scores across courses are statistically significant, a Kruskal-Wallis rank sum test test should be conducted.
+
+
+```{r}
+ggplot(feedback_data, aes(sample = satisfaction_score)) +
+  stat_qq() +
+  stat_qq_line(color = "red") +
+  facet_wrap(~ course) +
+  labs(
+    title = "QQ Plot of Satisfaction Score by Course",
+    x = "Theoretical Quantiles (Normal Distribution)",
+    y = "Sample Quantiles (Satisfaction Score)"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+feedback_data %>%
+  group_by(course) %>%
+  summarise(
+    shapiro_p_value = shapiro.test(satisfaction_score)$p.value
+  )
+```
+
+Normality tests were conducted to confirm the absence of normality. According to the Q-Q plots and Shapiro-Wilk normality test results, satisfaction scores by course follow a normal distribution (p > 0.05), except for satisfaction scores of data science (p < 0.05), justifying the use of a Kruskal-Wallis rank sum test. 
+
+
+```{r}
+kruskal.test(satisfaction_score ~ course, data = feedback_data)
+```
+
+According to the Kruskal-Wallis rank sum test result, the null hypothesis is rejected. The median satisfaction scores are statistically significantly different across courses (p < 0.05). 
+
+
+
+# Appendix 6. Is there an interaction between gender and level on satisfaction?
+
+$$ 
+H_0:\beta_{\text{gender : level}} = 0 \quad \text{vs.} \quad H_1: 
+\beta_{\text{gender : level}} \neq 0 
+$$
+
+```{r}
+anova_model <- aov(satisfaction_score ~ gender * level, data = feedback_data)
+
+anova_residuals <- residuals(anova_model)
+
+residuals <- data.frame(residuals = anova_residuals)
+
+ggplot(residuals, aes(sample = residuals)) +
+  stat_qq() +
+  stat_qq_line(color = "red") +
+  labs(
+    title = "Q-Q Plot of Residuals",
+    x = "Theoretical Quantiles (Normal Distribution)",
+    y = "Sample Quantiles (Residuals)"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+shapiro.test(residuals$"residuals")
+```
+
+To assess normality, ANOVA residuals were used. According to the Q-Q plot and Shapiro-Wilk normality test results, the residuals do not follow a normal distribution (p < 0.05), suggesting the use of a GLM model. 
+
+
+```{r}
+glm_model <- glm(satisfaction_score ~ gender * level, data = feedback_data, 
+                 family = gaussian())
+
+summary(glm_model)
+```
+
+According to the GLM result, the null hypothesis is not rejected. Gender has no statistically significant effect on satisfaction (the p-values of genderMale and genderOther > 0.05). Likewise, level has no statistically significant effect on satisfaction (the p-value of levelUndergraduate > 0.05). Then, the interaction of gender and level has no statistically significant effect on satisfaction (the p-values of genderMale:levelUndergraduate and genderOther:levelUndergraduate > 0.05).    
+
+
+```{r}
+anova_model <- aov(satisfaction_score ~ gender * level, data = feedback_data)
+summary(anova_model)
+```
+
+To support the outcome, a two-way ANOVA test was conducted. Since the residuals do not follow a normal distribution, the accuracy of this test may not be reliable. However, the result also shows that gender, level, and their interaction have no statistically significant effect on satisfaction (all p-values > 0.05), indicating the same findings from the GLM result.    
+
+
+
+# Appendix 7. Is the proportion of males equal to that of females?
+
+$$ 
+H_0:\ p_{\text{male}} = p_{\text{female}} \quad \text{vs.} \quad H_1: p_{\text{male}} \neq p_{\text{female}}
+$$
+
+```{r}
+male_female_data <- feedback_data$gender[feedback_data$gender %in% c("Male", "Female")]
+male_female_data <- droplevels(as.factor(male_female_data))
+
+gender_counts <- table(male_female_data)
+
+print(gender_counts)
+```
+
+The total number of females is 981, while the total number of males is 929.
+
+
+```{r}
+chisq_result <- chisq.test(gender_counts, p = c(0.5, 0.5))
+
+chisq_result$expected
+```
+
+Based on the expected frequency results, each cell is more than 5. Then, a Chi-squared test was conducted.   
+
+
+```{r}
+chisq_result <- chisq.test(gender_counts, p = c(0.5, 0.5))
+
+print(chisq_result)
+```
+
+According to the Chi-squared test result, the null hypothesis is not rejected (P > 0.05). Therefore, the difference in gender proportions is not statistically significant.   
+
+
+
+# Appendix 8. Are course and recommendation in the male population associated?
+
+$$
+\begin{aligned}
+H_0:\ P {\text{(Recommendation | Course)}} = P{\text{(Recommendation)}} \quad \text{vs.} \\    
+H_1:\ P {\text{(Recommendation | Course)}}  \neq P{\text{(Recommendation)}}
+\end{aligned}
+$$
+
+```{r}
+male_data <- subset(feedback_data, gender == "Male")
+
+male_table <- table(male_data$course, male_data$recommended)
+
+expected_frequency <- chisq.test(male_table, simulate.p.value = FALSE)$expected
+
+print(expected_frequency)
+```
+
+Based on the expected frequency results, each cell is more than 5. Then, a Chi-squared test was conducted.   
+
+
+```{r}
+chi_test <- chisq.test(male_table)
+
+print(chi_test)
+```
+
+According to the Chi-squared test result, the null hypothesis is not rejected (p > 0.05). Therefore, there is no statistically significant association between course and recommendation in the male population. 
+
+
+
+# Appendix 9. Are gender and perceived improvement associated?
+
+$$
+\begin{aligned}
+H_0:\ P {\text{(Improvement | Gender)}} = P{\text{(Improvement)}} \quad \text{vs.} \\
+H_1:\ P {\text{(Improvement | Gender)}}  \neq P{\text{(Improvement)}}
+\end{aligned}
+$$
+
+```{r}
+gender_improvement_table <- table(feedback_data$gender, feedback_data$improved)
+
+expected_frequency <- chisq.test(gender_improvement_table, 
+                                 simulate.p.value = FALSE)$expected
+
+print(expected_frequency)
+```
+
+Based on the expected frequency results, each cell is more than 5. Then, a Chi-squared test was conducted. 
+
+
+```{r}
+chi_test <- chisq.test(gender_improvement_table)
+
+print(chi_test)
+```
+
+According to the Chi-squared test result, the null hypothesis is not rejected (p > 0.05). Therefore, there is no statistically significant association between gender and improvement.  
+
+
+
+# Appendix 10. What are the key predictors of students’ satisfaction score?
+
+# a. Find the best linear model to explain students’ satisfaction score.
+
+
+```{r}
+full_feature_model <- lm(satisfaction_score ~ gender + level + course + 
+                         study_hours + improved + recommended, 
+                         data = feedback_data)
+
+summary(full_feature_model)
+```
+
+According to the result, the best linear model for explaining satisfaction score may include only course (p < 0.05). The other features do not have statistically significant associations with satisfaction.  
+
+
+```{r}
+best_model <- lm(satisfaction_score ~ course * gender, data = feedback_data)
+
+summary(best_model)
+```
+
+The model including course and its interaction with gender performs slightly better than the model with only course. However, this model only explains approximately 6.5% (adjusted R-squared) of the satisfaction variance.
+
+
+
+# b. Comment on the effect size of the significant predictor
+
+```{r}
+summary(lm(formula = satisfaction_score ~ course * gender, data = feedback_data))
+```
+
+According to the result, female students in business showed an average 6.7 satisfaction score (p < 0.05). Female students in data science showed a 0.88 points higher average satisfaction score than female students in business (p < 0.05). Female students in psychology showed a 0.54 points higher average satisfaction score than female students in business (p < 0.05). In addition, male and the interaction of male and data science have marginally significant associations with satisfaction. Males in business showed 2.4 points higher average satisfaction score than females in business. Then, the difference in average satisfaction scores between males and females in data science is approximately 0.33 points lower than the difference between males and females in business.   
+
+
+
+# c. Comment on how much of the variation in satisfaction can be explained by the significant predictors.
+
+```{r}
+model_exp <- lm(satisfaction_score ~ course * gender, data = feedback_data)
+
+summary(model_exp)$adj.r.squared
+```
+
+The result indicates that approximately 6.5% of the variation in satisfaction can be explained by course and its interaction with gender. The figure is statistically significant (p < 0.05), as shown in the appendix 10 (b). For future research, additional predictors that can explain the remaining 93.5% should be identified and incorporated.    
+
