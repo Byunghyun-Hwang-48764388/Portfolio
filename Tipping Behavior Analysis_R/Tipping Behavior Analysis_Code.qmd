@@ -1,0 +1,484 @@
+---
+title: "Tipping Behavior Analysis"
+author: "Byunghyun Hwang"
+format: 
+  html: default
+  pdf:
+    fontsize: 11pt
+    geometry: margin=1in
+execute:
+  echo: false
+  warning: false
+  message: false
+bibliography: references.bib
+---
+
+## Data Summary
+
+This dataset contains 244 restaurant transactions from a U.S. restaurant, where each record includes the total bill, tip amount, customer demographic information, and dining information [@kaggle_data].
+
+### **Variables**
+
+-   **total_bill**: total cost of the meal (\$)
+
+-   **tip**: tip amount (\$)
+
+-   **sex**: gender of the customer (Male of Female)
+
+-   **smoker**: smoker or non-smoker (Yes or No)
+
+-   **day**: day of visit (Thursday to Sunday)
+
+-   **time**: time to visit the restaurant (Lunch or Dinner)
+
+-   **size**: number of people at table
+
+## Research Purpose
+
+In the United States, tipping in restaurants has been a cultural practice to appreciate good service. Nowadays, however, some consumers have expressed frustration arguing that tipping has become pressured by staff. This can be especially confusing for travelers who are unfamiliar with the tip culture since they do not know how much they are supposed to tip.
+
+For restaurant employees, tipping remains a significant part of their income. This results in a natural tension between customers and service staff members.
+
+Therefore, this study explores two key research questions:
+
+**what is a reasonable tip amount, and what types of customers tend to tip more?**
+
+For this analysis, three R packages are used: ggplot2, dplyr, and scales [@ggplot2; @dplyr; @scales].
+
+## Research Questions
+
+### **Main Questions**
+
+-   What is a reasonable tip amount?
+-   What types of customers tend to tip more?
+
+### **Sub-Questions**
+
+-   Do larger groups leave higher tips?
+-   Do dinner customers tip more than lunch customers?
+-   Do tipping rates differ by day?
+-   Do tipping rates differ by day and meal time?
+-   Does spending on more on a meal lead to higher tip rates?
+
+## EDA1
+
+### **1. Bill Distribution**
+
+```{r}
+#| echo: false
+
+library(ggplot2)
+
+# Import the dataset
+tip_data <- read.csv("tip.csv")
+```
+
+```{r}
+#| echo: false
+
+# Display summary statistics (min, Q1, median, mean, Q3, max) for total bills
+summary(tip_data$total_bill)
+```
+
+```{r}
+#| echo: false
+
+# Draw a plot of total bill distribution
+ggplot(tip_data, aes(x = total_bill)) +
+  geom_histogram(bins = 20, 
+                 fill = "#4CAF50",
+                 color = "black") +
+  labs(title = "Distribution of Total Bill",
+       x = "Total Bill ($)",
+       y = "Count") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+The average and median total bills are approximately \$20 and \$18, respectively, with values ranging from approximately \$3 to \$51. The mean is slightly higher than the median due to extreme values. Most customers spend between roughly \$13 and \$24. This indicates that this restaurant is a moderately priced restaurant.
+
+### **2. Tip Amount**
+
+```{r}
+#| echo: false
+
+# Display summary statistics (min, Q1, median, mean, Q3, max) for tip
+summary(tip_data$tip)
+```
+
+```{r}
+#| echo: false
+
+# Draw a plot of tips distribution
+ggplot(tip_data, aes(x = tip)) +
+  geom_histogram(bins = 20, 
+                 fill = "#4CAF50",
+                 color = "black") +
+  labs(title = "Distribution of Tips",
+       x = "Tip Amount ($)",
+       y = "Count") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+The average and median tip amounts are approximately \$3, with tips ranging from \$1 to \$10. Most customers leave tips between roughly \$2 and \$3.6. This indicates that most customers leave modest tip amounts.
+
+### **3. Tip Rates**
+
+```{r}
+#| echo: false
+
+# Display summary statistics (min, Q1, median, mean, Q3, max) for tip_rate
+tip_data$tip_rate <- tip_data$tip / tip_data$total_bill * 100
+summary(tip_data$tip_rate)
+```
+
+```{r}
+#| echo: false
+
+# Draw a plot of tip rate distribution
+ggplot(tip_data, aes(x = tip_rate)) +
+  geom_histogram(bins = 20, 
+                 fill = "#4CAF50",
+                 color = "black") +
+  labs(title = "Distribution of Tip Rates",
+       x = "Tip Rates (%)",
+       y = "Count") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+The average and median tip rates are approximately 16% and 15.5%, respectively. The mean is slightly higher than the median due to extreme values. Most customers leave tips between roughly 13% and 19%. Although tip rates range from 3.6% to 71%, these extreme cases are outliers and do not represent typical tipping behavior.
+
+## EDA2
+
+### **1. Remove Outliers**
+
+```{r}
+#| echo: false
+
+# Import data again to make a cleaned dataset
+tip_data <- read.csv("tip.csv")
+tip_data$tip_rate <- tip_data$tip / tip_data$total_bill
+
+# Remove outliers using IQR
+Q1 <- quantile(tip_data$tip_rate, 0.25)
+Q3 <- quantile(tip_data$tip_rate, 0.75)
+IQR <- Q3 - Q1
+
+# Return data after filtering outliers
+cleaned_data <- tip_data[tip_data$tip_rate >= (Q1 - 1.5*IQR) &
+                         tip_data$tip_rate <= (Q3 + 1.5*IQR), ]
+```
+
+While conducting the initial exploratory data analysis for the first research question, it was found that outliers influenced the statistical results. To ensure a more accurate analysis, outliers were removed based on abnormal tip rates.
+
+### **2. Tip Rates by Group Size**
+
+We often assume that large groups at restaurants are associated with celebrations. It seems reasonable to expect that they might tip more due to a fest atmosphere. But, is this actually true?
+
+```{r}
+#| echo: false
+library(dplyr)
+
+# Re-categorize the group size 
+cleaned_data <- cleaned_data |>
+  mutate(group_type = ifelse(size <= 2, "Small (1-2)", "Large (3+)")) |>
+  mutate(group_type = factor(group_type, levels = c("Small (1-2)", "Large (3+)")))
+
+# Display summary statistics (count, mean, median) for tip_rates by group size
+cleaned_data |>
+  group_by(group_type) |>
+  summarise(
+    count = n(),
+    tip_rates_mean = round(mean(tip_rate), 3),
+    tip_rates_median = round(median(tip_rate), 3)
+  )
+```
+
+```{r}
+#| echo: false
+
+library(scales)
+
+# Draw a plot of tip rates by group size 
+cleaned_data$group_type <- factor(cleaned_data$group_type, 
+                                  levels = c("Small (1-2)", "Large (3+)"))
+ggplot(cleaned_data, aes(x = group_type, y = tip_rate, fill = group_type)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("#4CAF50", "#26A69A")) + 
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  labs(title = "Tip Rates by Group Size",
+       x = "Group Size",
+       y = "Tip Rates") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = "none")
+```
+
+```{r}
+#| echo: false
+
+# Conduct a Wilcoxon rank sum exact test
+wilcox.test(tip_rate ~ group_type, data = cleaned_data)
+```
+
+Since the original group sizes were unevenly distributed, so customers were re-categorized into two groups (1-2 people vs 3+ people) to ensure a more balanced comparison.
+
+The box plot suggests that smaller groups tend to leave slightly higher tip rates than larger groups. To examine whether this difference is statistically meaningful, a Wilcoxon rank-sum test was conducted. The result indicates no statistically significant difference in tip rate (p-value \> 0.05). In other words, while smaller groups appear to tip slightly more, this difference is not statistically significant in this dataset.
+
+### **3. Tip Rates by Meal Time**
+
+Do you think meal time (lunch or dinner) influences tipping behavior? It is not obvious, but dinner customers might leave higher tips since dinner is typically a more relaxed and social occasion compared to lunch.
+
+```{r}
+#| echo: false
+
+# Arrange meal time in order
+cleaned_data <- cleaned_data |>
+  mutate(time = factor(time, levels = c("Lunch", "Dinner")))
+
+# Display summary statistics (count, mean, median) for tip_rates by meal time
+cleaned_data |>
+  group_by(time) |>
+  summarise(
+    count = n(),
+    tip_rate_mean = round(mean(tip_rate), 3),
+    tip_rate_median = round(median(tip_rate), 3)
+  )
+```
+
+```{r}
+#| echo: false
+
+# Draw a box plot for tip rates by meal time
+cleaned_data$time <- factor(cleaned_data$time, levels = c("Lunch", "Dinner"))
+
+ggplot(cleaned_data, aes(x = time, y = tip_rate, color = time)) +
+  geom_jitter(width = 0.15, alpha = 0.5) +
+  geom_boxplot(width = 0.2, alpha = 0.2, outlier.shape = NA) +
+  scale_color_manual(values = c("#4CAF50", "#26A69A")) +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  labs(title = "Tip Rates by Meal Time",
+       x = "Meal Time",
+       y = "Tip Rates") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = "none")
+```
+
+```{r}
+#| echo: false
+
+# Conduct a Wilcoxon rank sum exact test
+wilcox.test(tip_rate ~ time, data = cleaned_data)
+```
+
+The box plot suggests that lunch customers tend to leave slightly higher tip rates than dinner customers. To examine whether this difference is statistically meaningful, a Wilcoxon rank-sum test was conducted. The result indicates no statistically significant difference in tip rate (p-value \> 0.05). In other words, although lunch customers appear to tip slightly more, this difference is not statistically significant in this dataset.
+
+### **4. Tip Rates by Day**
+
+For most people, Friday might be the happiest day of the week since it is the beginning of the weekend. It is reasonable to expect that customers might leave higher tips on Fridays since the atmosphere is more relaxed and social compared to other days. Does the data support this expectation?
+
+```{r}
+#| echo: false
+
+# Set day order: Thur → Fri → Sat → Sun
+cleaned_data$day <- factor(cleaned_data$day,
+                           levels = c("Thur", "Fri", "Sat", "Sun"))
+
+# Display summary statistics (count, mean, median) for tip rates by day
+cleaned_data |>
+  group_by(day) |>
+  summarise(
+    count = n(),
+    mean_tip_rate = round(mean(tip_rate)*100, 2),
+    median_tip_rate = round(median(tip_rate)*100, 2)
+  )
+```
+
+```{r}
+#| echo: false
+
+# Calculte mean tip rates and standard error
+day_summary <- cleaned_data |>
+  group_by(day) |>
+  summarise(
+    mean_rate = mean(tip_rate)*100,
+    se = sd(tip_rate)*100/sqrt(n())
+  )
+
+# Draw a plot for average tip rates by day
+ggplot(day_summary, aes(x = day, y = mean_rate)) +
+  geom_point(size = 4, color = "#2E7D32") +
+  geom_errorbar(aes(ymin = mean_rate - se, ymax = mean_rate + se), width = 0.2) +
+  scale_y_continuous(labels = percent_format(scale = 1)) +
+  labs(
+    title = "Average Tip Rates by Day",
+    x = "Day",
+    y = "Mean Tip Rates"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+#| echo: false
+
+# Calculte median tip rates and standard error
+day_summary_median <- cleaned_data |>
+  group_by(day) |>
+  summarise(
+    median_rate = median(tip_rate)*100,
+    q1 = quantile(tip_rate, 0.25)*100,
+    q3 = quantile(tip_rate, 0.75)*100
+  ) |>
+  mutate(
+    ymin = q1,
+    ymax = q3
+  )
+
+# Draw a plot for median tip rates by day
+ggplot(day_summary_median, aes(x = day, y = median_rate)) +
+  geom_point(size = 4, color = "#1565C0") +
+  geom_errorbar(aes(ymin = ymin, ymax = ymax), width = 0.2) +
+  scale_y_continuous(labels = percent_format(scale = 1)) +
+  labs(
+    title = "Median Tip Rates by Day",
+    x = "Day",
+    y = "Median Tip Rates"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+```{r}
+#| echo: false
+
+# Conduct Kruskal-Wallis rank sum test
+kruskal.test(tip_rate ~ day, data = cleaned_data)
+```
+
+The graphs show that customers tend to leave higher tip rates on average, and there are occasional big tippers on Fridays. In contrast, Sundays show relatively stable and consistent tipping behavior with a higher median tip rate. Saturday shows the lowest average and median tip rates among all days. To examine whether these differences are statistically meaningful, a Kruskal-Wallis rank sum test was conducted. The result indicates no statistically significant difference in tip rate across days (p-value \> 0.05). In other words, while customers appear to leave higher tip rates on Friday and Sunday, the differences are not statistically significant in this dataset.
+
+### **5. Tip Rates by Day and Meal Time**
+
+Even on the same day, tip rates may differ depending on the meal time. For example, it is reasonable to expect that customers might leave higher tip rates during Friday dinners since it is the start of the weekend and people tend to be in a more relaxed mood.
+
+```{r}
+#| echo: false
+
+# Arrange days in order
+cleaned_data$day <- factor(cleaned_data$day,
+                           levels = c("Thur","Fri","Sat","Sun"))
+
+# Arrange meal time in order
+cleaned_data$time <- factor(cleaned_data$time,
+                            levels = c("Dinner", "Lunch"))
+
+# Calculate the mean tip rates
+heat_data <- cleaned_data |>
+  group_by(day, time) |>
+  summarise(mean_tip = mean(tip_rate) * 100, .groups = "drop")
+
+# Draw a heat-map for tip rates by day and meal time
+ggplot(heat_data, aes(x = day, y = time, fill = mean_tip)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = sprintf("%.1f%%", mean_tip)), color = "black", size = 4.5) +
+  scale_fill_gradient(low = "#E8F5E9", high = "#2E7D32") + 
+  labs(
+    title = "Tip Rates by Day and Meal Time",
+    x = "Day",
+    y = "Meal Time",
+    fill = "Avg Tip Rate"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 14, face = "bold")
+  )
+```
+
+```{r}
+#| echo: false
+
+# Conduct a Wilcoxon rank sum exact test
+friday_data <- cleaned_data |> filter(day == "Fri")
+wilcox.test(tip_rate ~ time, data = friday_data)
+```
+
+In the previous analysis, Fridays showed a tendency for higher tip rates on average, with occasional big tippers. The heat map shows that Friday lunch customers tip slightly more than Friday dinner customers. To examine whether this difference is statistically meaningful, a Wilcoxon rank sum exact test was conducted. The result indicates no statistically significant difference in tip rate between Friday lunch and dinner (p-value \> 0.05). In other words, although Friday lunch customers appear to tip more for Friday dinner customers, this difference is not statistically significant in this dataset.
+
+### **6. Tip Rates and Total Bill**
+
+Many people might assume that customers who spend more on their meals tend to leave higher tip rates. It seems reasonable since they might be more generous tippers. Let's look at the data to find out whether this expectation holds true.
+
+```{r}
+#| echo: false
+
+# Create two bill groups based on median
+median_bill <- median(cleaned_data$total_bill)
+
+cleaned_data <- cleaned_data |>
+  mutate(bill_group = ifelse(total_bill <= median_bill, 
+                             "Low Bill", 
+                             "High Bill"))
+
+# Display summary statistics (count, mean, median) for tip rates by bill groups
+cleaned_data |>
+  group_by(bill_group) |>
+  summarise(
+    count = n(),
+    mean_tip_rate = round(mean(tip_rate)*100, 2),
+    median_tip_rate = round(median(tip_rate)*100, 2)
+  )
+```
+
+```{r}
+#| echo: false
+
+library(scales)
+
+# Draw a plot for tip rate vs total bill
+ggplot(cleaned_data, aes(x = total_bill, y = tip_rate)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "loess", color = "#2E7D32") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  labs(title = "Tip Rate vs Total Bill",
+       x = "Total Bill ($)",
+       y = "Tip Rate") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+#| echo: false
+
+# Draw a plot for tip amound vs total bill
+ggplot(cleaned_data, aes(x = total_bill, y = tip)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "loess", color = "#1565C0") +
+  labs(title = "Tip Amount vs Total Bill",
+       x = "Total Bill ($)",
+       y = "Tip Amount ($)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+#| echo: false
+
+# Conduct a Wilcoxon rank sum exact test
+wilcox.test(tip_rate ~ bill_group, data = cleaned_data)
+```
+
+The tip amount vs total bill graph shows that tip amounts increase as total bills increase. However, The tip rate vs total bill graph shows a different pattern. Tip rates do not increase with spending and instead show a non-positive relationship. To investigate the pattern further, customers are divided into two groups, low bill and high bill, based on the median bill amount. Low bill customers tend to leave higher and more consistent tip rates than high bill customers. A Wilcoxon rank sum exact test confirms that the difference is statistically significant (p-value \< 0.05). In other words, customer who spend less on their meals tend to leave higher tip rates consistently than customers who spend more.
+
+## Conclusion
+
+Overall, the analysis suggests that typical tip rates in this moderately priced restaurant fall between 13% and 19%. Customers are generally expected to leave tip rates within the range.
+
+Regarding what types of customers tend to tip more, group size, meal time and day did not show statistically significant associations with tip rates. However, this does not imply that these factors have no influence on tipping behavior; rather, the dataset may not have enough sample size or variation to detect strong effects. Prior research on tipping behavior in Europe suggests that tipping behavior is influenced more by customer characteristics such as income, than by situational or service factors [@fernandez2024]. This supports findings of this study that although smaller groups, lunch customers, and Friday/Sunday customers tended to leave slightly higher tip rates, the differences were not statistically significant.
+
+However, it was statistically significant that customers who spent less on their meals tended to leave higher tip rates than those who spent more. This outcome aligns with previous research showing that tipping behavior is not determined solely by spending level and may reflect social norms and status-seeking motivations [@lynn2025].
+
+In summary, customer characteristics and tipping norms appear to have a stronger influence on tipping behavior, while situational and price-level factors provide some insight but have a more limited role.
+
+## References
