@@ -1,7 +1,6 @@
 ---
-title: "STAT6190: Statistical Report"
-author: "Byunghyun Hwang 48764388"
-date: "Compiled and submitted on 15th June 2025"
+title: "Student Feedback Analysis"
+author: "Byunghyun Hwang"
 output: 
     bookdown::pdf_document2:
       keep_tex: no
