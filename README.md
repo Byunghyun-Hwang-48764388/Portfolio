@@ -1,7 +1,7 @@
 # 📊 Data Science & Analysis Portfolio
 
-**Data Analyst with a Strategic Marketing Background** > Bridging the gap between raw data and actionable business insights.
-I am a **Data Analyst** with a multidisciplinary background in **Data Science** and **Marketing**. I have a deep passion for building robust **Database Systems** and delivering **Data-Driven Solutions** that solve real-world business challenges.
+**Data Analyst with a Strategic Marketing Background**  
+Bridging the gap between raw data and actionable business insights. I am a **Data Analyst** with a multidisciplinary background in **Data Science** and **Marketing**. I have a deep passion for building robust **Database Systems** and delivering **Data-Driven Solutions** that solve real-world business challenges.
 
 ### 💡 Professional Philosophy
 
