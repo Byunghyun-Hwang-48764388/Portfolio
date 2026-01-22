@@ -1,5 +1,5 @@
 📌 Project Overview
-Developed a machine learning model to predict heart attack risks based on patient health data. This project focuses on rigorous statistical validation and feature analysis to identify key clinical risk factors.
+- Developed a machine learning model to predict heart attack risks based on patient health data. This project focuses on rigorous statistical validation and feature analysis to identify key clinical risk factors.
 
 🛠️ Tech Stack
 - Languages: Python
