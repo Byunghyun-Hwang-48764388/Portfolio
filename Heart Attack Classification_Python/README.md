@@ -1,15 +1,15 @@
 📌 Project Overview
-Developed a machine learning model to predict heart attack risks. Focused on rigorous statistical validation and medical feature analysis to identify key patient risk factors.
+Developed a machine learning model to predict heart attack risks based on patient health data. This project focuses on rigorous statistical validation and feature analysis to identify key clinical risk factors.
 
 🛠️ Tech Stack
-Python: Scikit-learn, Scipy, Pandas, Seaborn
+- Languages: Python
+- Libraries: Pandas, NumPy, Scikit-learn, Scipy, Seaborn, Matplotlib
 
-📊 Key Analysis
-Statistical Rigor: Verified data distribution using Shapiro-Wilk and Mann-Whitney U tests for clinical validity.
+📊 Key Actions & Analysis
+- Statistical Validation: Performed Shapiro-Wilk and Mann-Whitney U tests to ensure data integrity and choose appropriate modeling techniques.
+- Exploratory Data Analysis (EDA): Visualized correlations between clinical features (e.g., chest pain type, max heart rate) and heart attack occurrence.
+- Predictive Modeling: Implemented classification models to achieve robust prediction performance.
 
-EDA: Visualized correlations between physiological metrics (e.g., heart rate, chest pain) and cardiac risk.
-
-Modeling: Built high-precision classifiers to identify high-risk patients.
-
-🖥️ Presentation
-Full Report: Detailed results and visualizations are in the uploaded PPT. Please refer to the PPT file in this repository.
+🖥️ Presentation & Results
+- Full Report: Detailed analysis steps and visualizations are included in the separate presentation file. Please refer to the PPT file in this directory for comprehensive results.
+- Insight: Identified specific physiological thresholds that significantly correlate with increased cardiac risk.
