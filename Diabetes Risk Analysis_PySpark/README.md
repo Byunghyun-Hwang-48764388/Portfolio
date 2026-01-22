@@ -8,12 +8,9 @@
 - Analysis Tools: PySpark SQL, Spark DataFrames
 
 🏗️ Data Engineering & Analysis Milestones
-- Medallion Pipeline:
-- * Bronze/Silver: Automated ingestion and rigorous data cleaning (handling missing values, schema enforcement).
-- Gold: Optimized feature-engineered tables for high-performance ML training.
-- Ad-hoc Analysis:
-  * Conducted targeted queries to uncover deep-dive insights beyond standard modeling.
-  Analyzed specific demographic risk factors and correlation patterns between glucose levels, BMI, and age to answer real-world clinical questions.
+- Bronze/Silver (Medallion Pipeline): Automated ingestion and rigorous data cleaning (handling missing values, schema enforcement).
+- Gold (Medallion Pipeline): Optimized feature-engineered tables for high-performance ML training.
+- Ad-hoc Analysis: Conducted targeted queries to uncover deep-dive insights beyond standard modeling and analyzed specific demographic risk factors and correlation patterns between glucose levels, BMI, and age to answer real-world clinical questions.
 - ML Modeling: Built scalable classification models to provide high-accuracy risk assessments.
 
 🖥️ Presentation
