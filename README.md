@@ -1,20 +1,28 @@
-# 📊 Data Science & Analysis Portfolio
+Hi, I'm Byunghyun Hwang 👋
 
-**Data Analyst with a Strategic Marketing Background**  
-Bridging the gap between raw data and actionable business insights. I am a **Data Analyst** with a multidisciplinary background in **Data Science** and **Marketing**. I have a deep passion for building robust **Database Systems** and delivering **Data-Driven Solutions** that solve real-world business challenges.
+Data Scientist & Engineer bridging the gap between raw data and business growth. Specialized in Cloud Data Engineering (Databricks/Spark), Statistical Modeling (Python/R), and Algorithmic Optimization.
 
-### 💡 Professional Philosophy
+### ⭐ Featured Projects
 
-"My goal is to bridge the gap between technical data engineering and strategic marketing. By leveraging my expertise in scalable data processing and advanced analytics, I aim to uncover actionable insights that drive real-world business value and marketing efficiency."
+### 🛠️ Data Engineering & Infrastructure
+1. Diabetes Risk Analysis
+- Built a production-level pipeline on Databricks using Medallion Architecture (Bronze/Silver/Gold). Includes Ad-hoc analysis for deep-dive clinical insights.
+2. In-Game Purchase Prediction & Analysis
+- Developed a PySpark-based pipeline for RPG player behavioral logs. Identified the "Progression Paradox" affecting purchase intent.
 
-### 🛠 Tech Stack
+### 📊 Advanced Analytics & Statistics
+1. Corporate Board Member Network Analysis
+- Utilized Graph Theory (NetworkX) to quantify power structures and identify "information brokers" within corporate boards.
+2. Consumer Tipping Behavior Analysis
+- Applied Regression Modeling & Hypothesis Testing in R to uncover economic drivers of gratuity patterns.
+3. Heart Attack Risk Prediction & Statistical Rigor
+- A high-integrity analysis project emphasizing rigorous statistical validation (Shapiro-Wilk, Mann-Whitney U tests).
 
-- **Data Engineering:** Apache Spark (PySpark, Spark SQL), Databricks, Delta Lake
-- **Languages:** SQL (MySQL, Spark SQL), Python, R
-- **Visualization:** Tableau, Power BI, Matplotlib, Seaborn
+### 🖥️ Algorithms & Optimization
+1. Nearest Neighbor Search: R-Tree Optimization
+- Optimized spatial data queries by benchmarking R-Tree Indexing against baseline methods, achieving logarithmic search efficiency.
 
 ### ✉️ Contact & Links
-
 - **Email:** ssowl6710@gmail.com
 - **LinkedIn:** https://www.linkedin.com/in/byunghyun/
 - **Tableau Public:** https://public.tableau.com/app/profile/byunghyun.hwang/vizzes
