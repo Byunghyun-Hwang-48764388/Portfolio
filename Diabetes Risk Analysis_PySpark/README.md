@@ -1,16 +1,20 @@
 📌 Project Overview
-- Built a production-level data pipeline on Databricks using PySpark to analyze diabetes risks. The core focus was implementing a scalable Medallion Architecture to ensure data reliability and structured processing for large-scale healthcare datasets.
+- Built a production-level data pipeline on Databricks using PySpark to analyze diabetes risks. This project demonstrates a full-cycle data solution: from implementing a scalable Medallion Architecture to performing Ad-hoc exploratory analysis to derive actionable clinical insights.
 
 🛠️ Tech Stack
 - Engine: Apache Spark (PySpark)
 - Environment: Databricks
 - Architecture: Medallion Architecture (Bronze, Silver, Gold Layers)
+- Analysis Tools: PySpark SQL, Spark DataFrames
 
-🏗️ Data Engineering Milestones
-- Bronze Layer: Ingested raw healthcare records into a landing zone, preserving original data integrity.
-- Silver Layer: Performed schema enforcement, missing value imputation, and data cleaning using PySpark to create a "source of truth."
-- Gold Layer: Optimized feature-engineered tables specifically for ML training, implementing business-level aggregations.
-- Scalable Pipeline: Designed the entire flow to be scalable within a distributed cloud environment.
+🏗️ Data Engineering & Analysis Milestones
+- Medallion Pipeline:
+- * Bronze/Silver: Automated ingestion and rigorous data cleaning (handling missing values, schema enforcement).
+- Gold: Optimized feature-engineered tables for high-performance ML training.
+- Ad-hoc Analysis:
+  * Conducted targeted queries to uncover deep-dive insights beyond standard modeling.
+  Analyzed specific demographic risk factors and correlation patterns between glucose levels, BMI, and age to answer real-world clinical questions.
+- ML Modeling: Built scalable classification models to provide high-accuracy risk assessments.
 
 🖥️ Presentation
-- Full Engineering Report: Detailed folder structures, pipeline diagrams, and ML results are in the uploaded PPT/PDF. Please refer to the documentation in this repository.
+- Analysis & Engineering Report: Detailed pipeline diagrams, Ad-hoc query results, and visualizations are documented in the PDF/PPT file. Please refer to the documentation in this repository.
