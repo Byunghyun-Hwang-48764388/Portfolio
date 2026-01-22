@@ -1,7 +1,5 @@
-In-Game Purchase Prediction & Behavioral Analysis
-
 📌 Project Overview
-This project focuses on predicting in-game purchase behavior (Binary Classification) based on RPG player activity logs. Beyond simple prediction, it involves deep exploratory analysis of various behavioral metrics to identify which factors most significantly influence a user's decision to spend.
+- This project focuses on predicting in-game purchase behavior (Binary Classification) based on RPG player activity logs. Beyond simple prediction, it involves deep exploratory analysis of various behavioral metrics to identify which factors most significantly influence a user's decision to spend.
 
 🛠️ Tech Stack
 - Infrastructure: Databricks, Apache Spark
