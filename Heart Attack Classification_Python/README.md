@@ -1,15 +1,19 @@
 📌 Project Overview
-- Developed a machine learning model to predict heart attack risks based on patient health data. This project focuses on rigorous statistical validation and feature analysis to identify key clinical risk factors.
+- This project focuses on developing a high-precision machine learning pipeline to predict heart attack risks and segment high-risk patient groups. By integrating rigorous statistical testing, advanced imbalance handling (SMOTE), and unsupervised learning (PCA & K-Means), I built a model that not only predicts risk but also identifies hidden physiological patterns in patient data.
 
-🛠️ Tech Stack
-- Languages: Python
-- Libraries: Pandas, NumPy, Scikit-learn, Scipy, Seaborn, Matplotlib
+🛠️ Tech Stack & Methodologies
+- Analysis: Python (Pandas, NumPy, Scipy)
+- Machine Learning: Scikit-learn (Classification, GridSearch, PCA, K-Means)
+- Imbalance Handling: Imbalanced-learn (SMOTE)
+- Visualization: Seaborn, Matplotlib
 
-📊 Key Actions & Analysis
-- Statistical Validation: Performed Shapiro-Wilk and Mann-Whitney U tests to ensure data integrity and choose appropriate modeling techniques.
-- Exploratory Data Analysis (EDA): Visualized correlations between clinical features (e.g., chest pain type, max heart rate) and heart attack occurrence.
-- Predictive Modeling: Implemented classification models to achieve robust prediction performance.
+📊 Advanced Engineering & Analysis
+- Statistical Foundation: Conducted Shapiro-Wilk and Mann-Whitney U tests to validate data distribution, ensuring the selection of appropriate non-parametric modeling techniques.
+- Handling Data Imbalance: Implemented SMOTE (Synthetic Minority Over-sampling Technique) to address class imbalance, significantly improving the model's ability to detect minority high-risk cases (Recall/F1-score).
+- Model Optimization: Performed Hyperparameter Tuning via GridSearchCV for Random Forest and Decision Tree models to maximize predictive accuracy.
+- Unsupervised Risk Segmentation: Applied PCA for dimensionality reduction followed by K-Means Clustering to categorize patients into distinct risk profiles, enabling targeted clinical intervention strategies.
 
-🖥️ Presentation & Results
-- Full Report: Detailed analysis steps and visualizations are included in the separate presentation file. Please refer to the PPT file in this directory for comprehensive results.
-- Insight: Identified specific physiological thresholds that significantly correlate with increased cardiac risk.
+🖥️ Key Results & Actionable Insights
+- Optimal Model Performance: Achieved robust classification results through systematic model comparison and tuning.
+- High-Risk Profiling: Identified specific physiological thresholds (e.g., chest pain type, max heart rate) that serve as primary indicators for cardiac events.
+- Strategic Recommendation: Proposed a Targeted Intervention Model where PCA-based clustering identifies "silent" high-risk groups that might be missed by standard linear analysis.
