@@ -21,7 +21,7 @@
 - Statistical Rigor: SciPy (Mann-Whitney U, Kruskal-Wallis, ANOVA) for hypothesis testing.
 - Data Source: SEC DEF 14A Filings (Real-world corporate data).
 
-💡 Dual-Path Identification Strategy
+🔍 Dual-Path Identification Strategy
 - To ensure a comprehensive search for the best acquisition leads, I implemented a two-pronged identification framework:
 - M&A-Driven Approach (Targeting Strategic Buyers)
   - Focus: Focused on Tier-1 IT corporations with a proven track record of multiple acquisitions ("Serial Acquirers").
