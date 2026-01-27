@@ -2,7 +2,6 @@ name: Diabetes_Project_CI
 
 on:
   push:
-    # 어떤 브랜치에 push해도 작동하도록 설정 (테스트용)
     branches: ["*"] 
   pull_request:
     branches: [ main ]
