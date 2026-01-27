@@ -1,0 +1,28 @@
+name: Diabetes_Project_CI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'Diabetes Risk Analysis_PySpark/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'Diabetes Risk Analysis_PySpark/**'
+
+jobs:
+  check:
+    name: Python Syntax Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Run Syntax Check
+        run: |
+          find "Diabetes Risk Analysis_PySpark" -name "*.py" -exec python -m py_compile {} +

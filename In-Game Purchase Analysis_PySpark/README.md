@@ -1,18 +1,25 @@
 📌 Project Overview
-- This project focuses on predicting in-game purchase behavior (Binary Classification) based on RPG player activity logs. Beyond simple prediction, it involves deep exploratory analysis of various behavioral metrics to identify which factors most significantly influence a user's decision to spend.
+- This project focuses on Binary Classification to predict whether a player will make an in-game purchase (1) or not (0) within an RPG environment. While conducted in a local environment, I simulated a Medallion Architecture (Bronze-Silver-Gold) to structure the data pipeline, focusing on how progression friction and player engagement drive monetization decisions.
+
+💡 Medallion Pipeline & Feature Engineering
+- I successfully simulated the data lifecycle to ensure structural integrity and strategic feature extraction:
+  - Bronze (Raw): Ingested raw behavioral logs of RPG players.
+  - Silver (Refined): Engineered high-value KPIs to capture player psychology:
+    - LevelEfficiency: Measures progression speed; tests if fast growth reduces the need for paid boosts.
+    - WeeklyCommitment: Quantifies time investment to analyze the "Sunk Cost Effect" on purchasing.
+  - Gold (Aggregated): Finalized feature sets and applied Downsampling to address the class imbalance between purchasers (1) and non-purchasers (0).
+
+📊 ML Model Performance
+- Given the nature of the synthetic dataset, the focus was on comparing model behaviors rather than achieving absolute high scores.
+  - Linear SVM: 50.40% accuracy
+  - Random Forest: 51.24% accuracy
+  - Gradient Boosted (GBT): 52.27% accuracy
+
+🔍 Major Discovery & Research Limitations
+- The Accuracy Paradox: The model accuracy remained around 52% primarily due to the use of Synthetic Data, which lacks the complex behavioral nuances and hidden correlations found in real-world player telemetry.
+- Value Beyond Prediction: Despite the predictive constraints, the analysis identified LevelEfficiency and EngagementScore as the primary system variables. This proves that even when individual prediction is challenging, data can still provide the strategic direction needed to balance an in-game economy.
 
 🛠️ Tech Stack
-- Infrastructure: Databricks, Apache Spark
-- Data Engineering: PySpark (Medallion Architecture: Bronze, Silver, Gold)
-- Machine Learning: Spark MLlib (GBT, Random Forest, SVM)
-
-📊 Key Actions & Analysis
-1. Automated ETL Pipeline: Built a robust pipeline on Databricks to transform raw telemetry logs into a structured "Gold" dataset optimized for behavioral modeling.
-2. Feature Engineering: Developed custom columns such as LevelEfficiency (progression speed) and WeeklyCommitment to quantify player loyalty and growth patterns.
-3. Behavioral Analysis:
-- The Progression Paradox: Discovered that exceptionally high leveling efficiency negatively correlates with purchase intent, suggesting players feel less "necessity" for paid boosts.
-- Engagement Impact: Analyzed multiple behavioral columns to conclude that a composite EngagementScore is a stronger predictor of spending than isolated metrics like session frequency.
-
-🖥️ Presentation & Results
-- Full Analysis Report: I have uploaded a separate PowerPoint (PPT) slide deck containing the detailed analysis and visualization of this project. Please refer to the PPT file in this repository for the comprehensive results.
-- Best Model: The GBT (Gradient Boosted Trees) Classifier outperformed other models by effectively capturing the non-linear relationships between player demographics and in-game behavior.
+- Engine: Python (PySpark)
+- Architecture: Simulated Medallion Pipeline (Bronze, Silver, Gold)
+- ML Library: SparkML (LinearSVC, RandomForest, GBT)

@@ -1,17 +1,16 @@
-
-
 📌 Project Overview
-- This project focuses on optimizing spatial data queries by comparing different algorithms to find the nearest parking lot for each user. It demonstrates an understanding of spatial indexing and algorithmic complexity by benchmarking three distinct search methods.
+- Developed a high-efficiency spatial search engine to solve the Nearest Neighbor (NN) problem, matching 200 user queries to their closest parking spaces among 150,000 available points. By implementing R-Tree Indexing and optimizing it with Divide-and-Conquer strategies, I achieved a 95% reduction in total processing time.
 
-🛠️ Tech StackLanguage 
-- PythonKey Libraries: Rtree, Scipy (Spatial)
-- PandasData Structures: R-Tree (Spatial Indexing), Linear Arrays
+📊 Performance Benchmarking
+- Sequential Scan (Baseline): 11.036090 sec
+- Branch and Bound (BaB): 1.692319 sec (~6.5x Faster)
+- BaB with Divide-and-Conquer: 0.540460 sec (~20.4x Faster) 
 
-📊 Benchmarking & Performance Analysis
-- Brute-Force Search: Established a baseline by calculating distances between all user-parking pairs.
-- Linear Search Optimization: Implemented a simplified linear approach to evaluate basic improvements.
-- R-Tree Method: Leveraged R-Tree indexing to achieve logarithmic search time, drastically reducing computational overhead for large-scale spatial datasets.
+🔍 Key Engineering Achievements
+- The Ultimate Optimization (Divide-and-Conquer): Beyond standard indexing, I integrated a Divide-and-Conquer approach to further partition the search space. This strategy reduced computational overhead by an additional 68% compared to the standard BaB method, achieving a sub-second response time.
+- 20.4x Speedup: Successfully optimized the core search logic from 11s (Sequential) to 0.54s for 200 concurrent user queries against a massive dataset.
+- Scalability & Pruning: Leveraged R-Tree spatial indexing to implement efficient pruning, ensuring O(log N) search complexity and proving the system's readiness for large-scale, real-time environments.
 
-🖥️ Key Findings
-- Optimization Impact: The R-Tree method significantly outperformed traditional searches as the data volume increased, proving the necessity of spatial indexing in real-time location-based services.
-- Scalability: Validated the scalability of the R-Tree approach for high-density geographic data.
+🖥️ Business Impact & Actionable Use Cases
+- Real-time Parking Discovery: This engine can be deployed in navigation apps to find the nearest available parking lot among hundreds of thousands of options in milliseconds, ensuring a seamless user experience.
+- Infrastructure Cost Reduction: By optimizing the algorithm to be 20 times more efficient, the system significantly reduces server CPU load, allowing the platform to handle much higher traffic without increasing infrastructure costs.
